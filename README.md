@@ -10,7 +10,8 @@ So without further ado, lets dive in.
 
 A shellcode is basically a payload used by attackers, crafted in order to exploit a vulnerability, it should be as small in size as possible.  
 As mentioned above, a shellcode needs to be meticulously crafted and so it is usually written in assembly by hand.  
-One might ask themselves, why not just write a piece of c language code, compile it, hex dump it and use it as a payload? Well since a shellcode is basically a "string" if we have null bytes in the middle it will cut the payload in the middle, a thing that will most probably occur in the given scenario.  
+One might ask themselves, why not just write a piece of c language code, compile it, hex dump it and use it as a payload?   
+Well since a shellcode is basically a "string" if we have null bytes in the middle it will cut the payload in the middle, a thing that will most probably occur in the given scenario.  
 
 Before we dive further in regarding the technical details of writing a successful shellcode there are couple required tools:  
 - a Linux machine, i use ubuntu 22.04, kernel version 6.8.0-48, with disabled aslr (echo 0 > /proc/sys/kernel/randomize_va_space)  
