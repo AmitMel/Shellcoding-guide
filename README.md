@@ -90,7 +90,7 @@ As we know the syscall needed is write() to fd 1 (stdout), a quick look in a sys
 - eax = syscall number (int)
 - ebx = fd (int)
 - ecx = buffer for printing (const char *)
-- edx = buffer size (int)
+- edx = buffer size (int)  
 And of course we'll need to exit the shellcode as well using the syscall exit() needing:
 - eax = syscall number
 - ebx = error number (if there is no error just put 0)
