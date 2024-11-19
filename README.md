@@ -20,13 +20,13 @@ before we dive further in regarding the technical details of writing a successfu
 - objdump  
 - gcc  
 
-for the sake of this guide i'll write the examples in 32-bit
-after writing our assembly code we will compile it to object file using the following command:
-`nasm -f elf32 -o <prog_name>.o <prog_name>.asm`
-next, we'll compile the object file into an executable:
-`ld -m elf_i386 -o <prog_name> <prog_name>.o`
-the last step is extracting the payload from the executable:
-` objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g' `
+for the sake of this guide i'll write the examples in 32-bit  
+after writing our assembly code we will compile it to object file using the following command:  
+`nasm -f elf32 -o <prog_name>.o <prog_name>.asm`  
+next, we'll compile the object file into an executable:  
+`ld -m elf_i386 -o <prog_name> <prog_name>.o`  
+the last step is extracting the payload from the executable:  
+` objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g' `  
 
 
 ## Dos and Donts - spot the differences
