@@ -43,3 +43,13 @@ mov  eax, 0
 ```
 The first option is optimal, uses only one instruction and wont cause any null bytes. on the other hand the second option, while being one instruction will cause a null terminator in the middle of our payload.  
 
+In the following example, both will work perfectly fine for writing a shellcode and wont cause any vital errors
+```
+xor  eax, eax
+cdq
+```
+```
+xor  eax, eax
+xor  edx, edx
+```
+As we can see, both options will work perfectly for a shellcode but the first code block will result in a shorter payload.  
