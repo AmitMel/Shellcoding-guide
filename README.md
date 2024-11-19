@@ -64,7 +64,7 @@ _start:
     jmp     my_label
 my_label_again:                         
     ...
-    mov    ecx, esp 
+    pop    ecx 
     int    0x80
 my_label:
     call    my_label_again
@@ -82,3 +82,45 @@ _start:
     int    0x80
 ```
 even though the second option requires about half the instructions, in shellcodes only the text section can be extracted into the payload so sadly our string in the data section in the second example will be lost during the payload extraction process.
+
+## From Registers To Syscalls
+Now that the fundamental principles for shellcoding are clear we can start crafting an actual working payload.  
+The first I reccomend doing is trying to imagine the goal of our shellcode and understand what syscalls are needed in order to achieve it, the simplest example it printing hello world to the terminal.  
+As we know the syscall needed is write() to fd 1 (stdout), a quick look in a syscall table for x86 shows us that in order to execute this syscall we need the following registers to contain some certain data:
+- eax = syscall number (int)
+- ebx = fd (int)
+- ecx = buffer for printing (const char *)
+- edx = buffer size (int)
+And of course we'll need to exit the shellcode as well using the syscall exit() needing:
+- eax = syscall number
+- ebx = error number (if there is no error just put 0)
+When implementing everything we learned so far we end up with the following code:
+```
+;say_hello.asm
+[SECTION .text]
+
+global _start
+
+_start:
+        xor eax, eax
+	    cdq
+        xor ebx, ebx
+        xor ecx, ecx
+	    jmp label_hello
+
+        label_write:
+	    pop ecx
+        mov al, 4       
+        mov bl, 1
+        mov dl, 11
+        int 0x80
+        xor eax, eax
+        mov al, 1 
+        xor ebx,ebx
+        int 0x80
+
+        label_hello:
+
+        call label_write
+        db 'hello world'
+```
