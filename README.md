@@ -1,8 +1,7 @@
 # basic shellcoding for Linux - the full guide
 
 ***disclaimer***  
-This guide was created for educational purposes only, it was formed after long hours of browsing on the internet and learning the basic principles of shellcoding, article by article,  
-gathering small bits of information until the entire image became clearer.  
+This guide was created for educational purposes only, it was formed after long hours of browsing on the internet and learning the basic principles of shellcoding, article by article, gathering small bits of information until the entire image became clearer.  
 Before reading I should clarify, my struggle learning shellcoding came from my lack of knowledge in assembly while having a decent understanding of the logic needed in order to write a successful shellcode.  
 So without further ado, lets dive in.  
 
