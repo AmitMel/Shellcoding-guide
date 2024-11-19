@@ -58,7 +58,6 @@ Working with strings in assembly can be quit a headache, lucky for us we can use
 section .text
 global _start
 _start:
-    bits    32
     xor     eax, eax
     cdq
     ... 
@@ -83,3 +82,4 @@ _start:
     mov ecx, thing
     int    0x80
 ```
+even though the second option requires about half the instructions, in shellcodes only the text section can be extracted into the payload so sadly our string in the data section in the second example will be lost in the process of the payload extaction. 
