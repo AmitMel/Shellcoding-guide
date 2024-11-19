@@ -53,3 +53,23 @@ xor  eax, eax
 xor  edx, edx
 ```
 As we can see, both options will work perfectly for a shellcode but the first code block will result in a shorter payload.  
+Working with strings in assembly can be quit a headache, lucky for us we can use the data segment! (or can we?)
+```
+global _start
+_start:
+    bits    32
+    xor     eax, eax
+    cdq
+    ... 
+    jmp     my_label
+my_label_again:                         
+    ...
+    int     0x80
+my_label:
+    call   my_label_again
+    db "hello world"
+
+```
+```
+
+```
