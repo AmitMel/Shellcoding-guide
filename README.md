@@ -55,6 +55,7 @@ xor  edx, edx
 As we can see, both options will work perfectly for a shellcode but the first code block will result in a shorter payload.  
 Working with strings in assembly can be quit a headache, lucky for us we can use the data segment! (or can we?)
 ```
+section .text
 global _start
 _start:
     bits    32
@@ -64,12 +65,21 @@ _start:
     jmp     my_label
 my_label_again:                         
     ...
-    int     0x80
+    mov    ecx, esp 
+    int    0x80
 my_label:
-    call   my_label_again
+    call    my_label_again
     db "hello world"
 
 ```
 ```
+section .data
+thing    db "hello world"
 
+section .text
+global _start
+_start:
+    ...
+    mov ecx, thing
+    int    0x80
 ```
