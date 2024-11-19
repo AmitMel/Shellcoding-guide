@@ -34,10 +34,12 @@ objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut
 ```
 
 ## Do's and Don'ts - spot the differences
-Let's start with a simple example, these 2 instructions are used for a simple, yet uninevitable task, initializing a register.  
+Let's start with a simple example, these 2 instructions are used for a simple, yet inevitable task, initializing a register.  
 ```
 xor  eax, eax
 ```
 ```
 mov  eax, 0
 ```
+The first option is optimal, uses only one instruction and wont cause any null bytes. on the other hand the second option, while being one instruction will cause a null terminator in the middle of our payload.  
+
