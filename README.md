@@ -82,4 +82,4 @@ _start:
     mov ecx, thing
     int    0x80
 ```
-even though the second option requires about half the instructions, in shellcodes only the text section can be extracted into the payload so sadly our string in the data section in the second example will be lost in the process of the payload extaction. 
+even though the second option requires about half the instructions, in shellcodes only the text section can be extracted into the payload so sadly our string in the data section in the second example will be lost during the payload extraction process.
