@@ -13,25 +13,25 @@ As mentioned above, a shellcode needs to be meticulously crafted and so it is us
 One might ask themselves, why not just write a piece of c language code, compile it, hex dump it and use it as a payload? Well since a shellcode is basically a "string"   
 if we have null bytes in the middle it will cut the payload in the middle, a thing that will most probably occur in the given scenario.  
 
-before we dive further in regarding the technical details of writing a successful shellcode there are couple required tools:  
+Before we dive further in regarding the technical details of writing a successful shellcode there are couple required tools:  
 - a Linux machine, i use ubuntu 22.04, kernel version 6.8.0-48, with disabled aslr (echo 0 > /proc/sys/kernel/randomize_va_space)  
 - nasm (gcc-multilib)  
 - ld  
 - objdump  
 - gcc  
 
-for the sake of this guide i'll write the examples in 32-bit  
-after writing our assembly code we will compile it to object file using the following command:  
+For the sake of this guide i'll write the examples in 32-bit  
+After writing our assembly code we will compile it to object file using the following command:  
 ```
 nasm -f elf32 -o <prog_name>.o <prog_name>.asm
 ```
-next, we'll compile the object file into an executable:  
+Next, we'll compile the object file into an executable:  
 ```
 ld -m elf_i386 -o <prog_name> <prog_name>.o
 ```
-the last step is extracting the payload from the executable:  
+The last step is extracting the payload from the executable:  
 ```
 objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g'   
 ```
 
-## Dos and Donts - spot the differences
+## Do's and Don'ts - spot the differences
