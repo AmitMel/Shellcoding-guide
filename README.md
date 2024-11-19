@@ -72,7 +72,7 @@ my_label:
 ```
 ```
 section .data
-thing    db "hello world"
+thing    db "hello world", 0
 
 section .text
 global _start
