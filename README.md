@@ -6,7 +6,7 @@ gathering small bits of information until the entire image became clearer.
 Before reading I should clarify, my struggle learning shellcoding came from my lack of knowledge in assembly while having a decent understanding of the logic needed in order to write a successful shellcode.
 So without further ado, lets dive in.
 
-What is a shellcode?
+# What is a shellcode?
 
 A shellcode is basically a payload used by attackers, crafted in order to exploit a vulnerability, it should be as small in size as possible.
 As mentioned above, a shellcode needs to be meticulously crafted and so it is usually written in assembly by hand.
@@ -26,4 +26,4 @@ next, we'll compile the object file into an executable: ld -m elf_i386 -o <prog_
 the last step is extracting the payload from the executable: objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g'
 
 
-Dos and Donts - spot the differences
+# Dos and Donts - spot the differences
