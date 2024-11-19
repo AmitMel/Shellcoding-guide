@@ -34,3 +34,10 @@ objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut
 ```
 
 ## Do's and Don'ts - spot the differences
+Let's start with a simple example, these 2 instructions are used for a simple, yet uninevitable task, initializing a register.  
+```
+xor  eax, eax
+```
+```
+mov  eax, 0
+```
