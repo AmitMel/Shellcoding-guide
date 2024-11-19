@@ -1,6 +1,6 @@
 # basic shellcoding for Linux - the full guide
 
-*** disclaimer ***
+***disclaimer***
 This guide was created for educational purposes only, it was formed after long hours of browsing on the internet and learning the basic principles of shellcoding, article by article, 
 gathering small bits of information until the entire image became clearer.
 Before reading I should clarify, my struggle learning shellcoding came from my lack of knowledge in assembly while having a decent understanding of the logic needed in order to write a successful shellcode.
@@ -21,9 +21,12 @@ before we dive further in regarding the technical details of writing a successfu
 - gcc
 
 for the sake of this guide i'll write the examples in 32-bit
-after writing our assembly code we will compile it to object file using the following command: nasm -f elf32 -o <prog_name>.o <prog_name>.asm
-next, we'll compile the object file into an executable: ld -m elf_i386 -o <prog_name> <prog_name>.o
-the last step is extracting the payload from the executable: objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g'
+after writing our assembly code we will compile it to object file using the following command: 
+`nasm -f elf32 -o <prog_name>.o <prog_name>.asm`
+next, we'll compile the object file into an executable: 
+`ld -m elf_i386 -o <prog_name> <prog_name>.o`
+the last step is extracting the payload from the executable:
+` objdump -d ./<prog_name> | grep '[0-9a-f]:' | grep -v 'file' | cut -f2 -d: | cut -f1-6 -d' ' | tr -s ' ' | tr '\t' ' ' | sed 's/ $//g' | sed 's/ /\\x/g' |paste -d '' -s | sed 's/^/"/' | sed 's/$/"/g' `
 
 
 ## Dos and Donts - spot the differences
