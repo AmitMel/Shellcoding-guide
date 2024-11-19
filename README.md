@@ -69,7 +69,6 @@ my_label_again:
 my_label:
     call    my_label_again
     db "hello world"
-
 ```
 ```
 section .data
