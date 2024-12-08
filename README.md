@@ -176,9 +176,9 @@ _start:
         mov al, 20
         int 0x80
         mov ebx, eax
+        mov eax, 37
         mov ecx, 15
         dec ebx
-        mov al, 37
         int 0x80
         jmp label_setsid
 
@@ -229,23 +229,23 @@ _start:
         int 0x80
         xor eax, eax
         xor ebx, ebx
+        mov al, 5           
         pop ebx  
         mov ecx, 2          
-        xor edx, edx
-        mov al, 5                
+        xor edx, edx        
         int 0x80            
         mov ebx, eax        
         xor eax, eax
-        xor ecx, ecx
-        mov al, 63                  
+        mov al, 63          
+        xor ecx, ecx        
         int 0x80            
         xor eax, eax
-        mov ecx, 1
-        mov al, 63                 
+        mov al, 63          
+        mov ecx, 1          
         int 0x80            
         xor eax, eax
-        mov ecx, 2
-        mov al, 63                
+        mov eax, 63         
+        mov ecx, 2          
         int 0x80            
         jmp label_sleep
 
