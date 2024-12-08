@@ -150,7 +150,7 @@ i will now show you how to achieve the same goal using a shellcode, we need to i
 - setsid() - eax = 66  
 - chdir("/") - eax = 12  
 - umask(0) - eax = 60  
-- close(al huge range of possible FDs) - eax = 6  
+- close(all huge range of possible FDs) - eax = 6  
 - open("/dev/null") - eax = 5  
 - dup2(0-2) - eax 63  
 - sleep(0, 60) - eax = 162  
@@ -176,9 +176,9 @@ _start:
         mov al, 20
         int 0x80
         mov ebx, eax
-        mov eax, 37
         mov ecx, 15
         dec ebx
+        mov al, 37
         int 0x80
         jmp label_setsid
 
@@ -229,23 +229,23 @@ _start:
         int 0x80
         xor eax, eax
         xor ebx, ebx
-        mov al, 5           
         pop ebx  
         mov ecx, 2          
-        xor edx, edx        
+        xor edx, edx
+        mov al, 5                
         int 0x80            
         mov ebx, eax        
         xor eax, eax
-        mov al, 63          
-        xor ecx, ecx        
+        xor ecx, ecx
+        mov al, 63                  
         int 0x80            
         xor eax, eax
-        mov al, 63          
-        mov ecx, 1          
+        mov ecx, 1
+        mov al, 63                 
         int 0x80            
         xor eax, eax
-        mov eax, 63         
-        mov ecx, 2          
+        mov ecx, 2
+        mov al, 63                
         int 0x80            
         jmp label_sleep
 
