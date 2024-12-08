@@ -131,8 +131,188 @@ The next step is preforming the shellcode extraction, the output is the followin
 ```
 No null bytes and quite a small size - great success
 
-## a practical example - daemon
+## A Practical Example - Daemon
 for those of you who dont know a daemon is a service in linux, it's distinct for not having a controlling terminal and being run under systemd.
-the easiest way to "daemonize" a process is using libc make_daemon function, when we use this function and strace the executable we should see the following output:
+this is achieved by running the following c function sequence: fork, setsid, chdir("/"), umask(0), sysconf(_SC_OPEN_MAX), close(0-_SC_OPEN_MAX), open("/dev/null"), dup2(0), dup2(1), dup2(2)
+basically whats happenning here is forcing init to take over our process by making it an orphan, making sure we're not session leader, closing all the open file descriptors and redirecting stdin/stdout/stderr to /dev/null. 
+the easiest way to "daemonize" a process is using libc make_daemon function, when we use this function and strace the executable we should see the following output:  
+
+![Alt text](images/make_daemon_strace.png)
+
+let's focus on the important bit, we can see clone being ran (because for some reason the fork c function uses the clone syscall and not fork syscall gotta love linux for that) and afterwards our process dies and the child process becomes an orphan and so the daemonizing process goes on.  
+when we see afterwards who's the process parent we can see its systemd  
+![Alt text](images/become_daemon_parent.png)
+
+i will now show you how to achieve the same goal using a shellcode, we need to invoke the following syscalls:   
+- fork() - eax = 2  
+- getpid() - eax = 20  
+- kill(our pid, 15) - eax = 37  
+- setsid() - eax = 66  
+- chdir("/") - eax = 12  
+- umask(0) - eax = 60  
+- close(al huge range of possible FDs) - eax = 6  
+- open("/dev/null") - eax = 5  
+- dup2(0-2) - eax 63  
+- sleep(0, 60) - eax = 162  
+- exit() - eax = 1  
+  
+here's the final result
+```
+daemon.asm
+[SECTION .text]
+
+global _start
+
+_start:
+        xor eax, eax
+        cdq
+        xor ebx, ebx
+        xor ecx, ecx
+
+        label_ffork:       
+        mov al, 2       
+        int 0x80
+        xor eax, eax
+        mov al, 20
+        int 0x80
+        mov ebx, eax
+        mov eax, 37
+        mov ecx, 15
+        dec ebx
+        int 0x80
+        jmp label_setsid
+
+        label_setsid:
+        xor eax, eax
+        mov al, 66
+        int 0x80
+        jmp label_chdir
+
+        label_chdir:
+        xor eax, eax
+        push word '/'
+        mov ebx, esp
+        mov al, 12
+        int 0x80
+        jmp label_umask
 
 
+        label_umask:
+        xor eax, eax
+        xor ebx, ebx
+        mov al, 60
+        int 0x80
+        xor eax, eax
+        cdq
+        xor ebx, ebx
+        xor ecx, ecx
+        jmp label_closes
+
+        label_closes:
+        xor eax, eax
+        cmp ecx, 256           
+        jge label_path         
+
+        mov ebx, ecx           
+        mov al, 6              
+        int 0x80               
+
+        inc ecx                
+        jmp label_closes       
+
+        label_devnull:
+        xor eax, eax
+        cdq
+        xor ebx, ebx
+        xor ecx, ecx
+        mov al, 6
+        int 0x80
+        xor eax, eax
+        xor ebx, ebx
+        mov al, 5           
+        pop ebx  
+        mov ecx, 2          
+        xor edx, edx        
+        int 0x80            
+        mov ebx, eax        
+        xor eax, eax
+        mov al, 63          
+        xor ecx, ecx        
+        int 0x80            
+        xor eax, eax
+        mov al, 63          
+        mov ecx, 1          
+        int 0x80            
+        xor eax, eax
+        mov eax, 63         
+        mov ecx, 2          
+        int 0x80            
+        jmp label_sleep
+
+        label_sleep:
+        xor eax, eax
+        xor ebx, ebx
+        push ax
+        push 60
+        mov ebx, esp
+        mov al, 162
+        int 0x80
+        xor eax, eax
+        xor ebx, ebx
+        xor ecx, ecx
+        mov al, 1
+        int 0x80
+
+        label_path:
+        call label_devnull
+        db '/dev/null'
+```
+
+i split the code into a few labels
+- label_ffork - do fork, then get our pid and kill our process
+- label_setsid - preform setsid
+- label_chdir - prefrom chdir("/")
+- label_umask - preform umask(0) and re-initialize the registers for the next label
+- label_closes - close a whole bunch of file descriptors
+- label_devnull - make sure again that fd 0 is close, open /dev/null for redirecting fds 0-2 and use dup2 to preform the redirection
+- label_sleep - make our daemon sleep for a minute so we have time to examine it (this is the place to put the actions you want the daemon to preform) and use exit to kill the daemon
+- label_path - push the string '/dev/null' to the stack for label_devnull and call label_devnull
+
+when strace-ing we expect to see fork being executed and then the code exits since the shellcode is as minimalistic as possible not like the compiled c code
+
+![Alt text](images/shellcode_strace.png)
+
+and the parent process really is systemd
+
+![Alt text](images/shellcode_parent.png)
+
+great success.
+
+the extracted shellcode
+```
+\x31\xc0\x99\x31\xdb\x31\xc9\xb0\x02\xcd\x80\x31\xc0\xb0\x14\xcd\x80\x89\xc3\xb8\x25\x00\x00\x00\xb9\x0f\x00\x00\x00\x4b\xcd\x80\xeb\x00\x31\xc0\xb0\x42\xcd\x80\xeb\x00\x31\xc0\x66\x6a\x2f\x89\xe3\xb0\x0c\xcd\x80\xeb\x00\x31\xc0\x31\xdb\xb0\x3c\xcd\x80\x31\xc0\x99\x31\xdb\x31\xc9\xeb\x00\x31\xc0\x81\xf9\x00\x01\x00\x00\x7d\x61\x89\xcb\xb0\x06\xcd\x80\x41\xeb\xed\x31\xc0\x99\x31\xdb\x31\xc9\xb0\x06\xcd\x80\x31\xc0\x31\xdb\xb0\x05\x5b\xb9\x02\x00\x00\x00\x31\xd2\xcd\x80\x89\xc3\x31\xc0\xb0\x3f\x31\xc9\xcd\x80\x31\xc0\xb0\x3f\xb9\x01\x00\x00\x00\xcd\x80\x31\xc0\xb8\x3f\x00\x00\x00\xb9\x02\x00\x00\x00\xcd\x80\xeb\x00\x31\xc0\x31\xdb\x66\x50\x6a\x3c\x89\xe3\xb0\xa2\xcd\x80\x31\xc0\x31\xdb\x31\xc9\xb0\x01\xcd\x80\xe8\xa3\xff\xff\xff\x2f\x64\x65\x76\x2f\x6e\x75\x6c\x6c
+```
+
+unfortunately we have a few null bytes in the shellcode so we have to examine it and make sure it doesnt cut in the middle
+we want to check this in a legitimate way so the following c code defines the shellcode as text section and runs it  
+```
+#include <stdio.h>
+unsigned char  __attribute__((section(".text#"))) code[] = "\x31\xc0\x99\x31\xdb\x31\xc9\xb0\x02\xcd\x80\x31\xc0\xb0\x14\xcd\x80\x89\xc3\xb8\x25\x00\x00\x00\xb9\x0f\x00\x00\x00\x4b\xcd\x80\xeb\x00\x31\xc0\xb0\x42\xcd\x80\xeb\x00\x31\xc0\x66\x6a\x2f\x89\xe3\xb0\x0c\xcd\x80\xeb\x00\x31\xc0\x31\xdb\xb0\x3c\xcd\x80\x31\xc0\x99\x31\xdb\x31\xc9\xeb\x00\x31\xc0\x81\xf9\x00\x01\x00\x00\x7d\x61\x89\xcb\xb0\x06\xcd\x80\x41\xeb\xed\x31\xc0\x99\x31\xdb\x31\xc9\xb0\x06\xcd\x80\x31\xc0\x31\xdb\xb0\x05\x5b\xb9\x02\x00\x00\x00\x31\xd2\xcd\x80\x89\xc3\x31\xc0\xb0\x3f\x31\xc9\xcd\x80\x31\xc0\xb0\x3f\xb9\x01\x00\x00\x00\xcd\x80\x31\xc0\xb8\x3f\x00\x00\x00\xb9\x02\x00\x00\x00\xcd\x80\xeb\x00\x31\xc0\x31\xdb\x66\x50\x6a\x3c\x89\xe3\xb0\xa2\xcd\x80\x31\xc0\x31\xdb\x31\xc9\xb0\x01\xcd\x80\xe8\xa3\xff\xff\xff\x2f\x64\x65\x76\x2f\x6e\x75\x6c\x6c";
+
+int main()
+{
+  int (*ret)() = (int(*)())code;
+  ret();
+}
+```
+the command for proper compiling is the following  
+```
+gcc -zexecstack -m32 -o shellcode_skeleton shellcode_skeleton.c
+```
+
+and like before, checking if it really runs under systemd   
+
+![Alt text](images/check_shellcode.png)
+
+## Every Good Thing Comes To An End
+i hope this guide made this whole grey-area a tad bit clearer, i will continue to upload shellcodes i write for fun every now and then to the asm directory :)
