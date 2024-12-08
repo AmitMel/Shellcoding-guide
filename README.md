@@ -1,7 +1,7 @@
 # Basic Shellcoding For Linux - The Full Guide
 
 ***disclaimer***  
-This guide was created for educational purposes only, it was formed after long hours of browsing on the internet and learning the basic principles of shellcoding, article by article, gathering small bits of information until the entire image became clearer.  
+This guide was created for educational purposes only, it was formed after long hours of browsing the internet and learning the basic principles of shellcoding, article by article, gathering small bits of information until the entire image became clearer.  
 Before reading I should clarify, my struggle learning shellcoding came from my lack of knowledge in assembly while having a decent understanding of the logic needed in order to write a successful shellcode.  
 So without further ado, lets dive in.  
 
@@ -10,7 +10,7 @@ So without further ado, lets dive in.
 A shellcode is basically a payload used by attackers, crafted in order to exploit a vulnerability, it should be as small in size as possible.  
 As mentioned above, a shellcode needs to be meticulously crafted and so it is usually written in assembly by hand.  
 One might ask themselves, why not just write a piece of c language code, compile it, hex dump it and use it as a payload?   
-Well since a shellcode is basically a "string" if we have null bytes in the middle it will cut the payload in the middle, a thing that will most probably occur in the given scenario.  
+Well since a shellcode is basically a "string" if we have null bytes it might cut the payload in the middle, a thing that will most probably occur in the given scenario.  
 
 Before we dive further in regarding the technical details of writing a successful shellcode there are couple required tools:  
 - a Linux machine, i use ubuntu 22.04, kernel version 6.8.0-48, with disabled aslr (echo 0 > /proc/sys/kernel/randomize_va_space)  
@@ -130,3 +130,9 @@ The next step is preforming the shellcode extraction, the output is the followin
 \x31\xc0\x99\x31\xdb\x31\xc9\xeb\x11\x59\xb0\x04\xb3\x01\xb2\x0b\xcd\x80\x31\xc0\xb0\x01\x31\xdb\xcd\x80\xe8\xea\xff\xff\xff\x68\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64
 ```
 No null bytes and quite a small size - great success
+
+## a practical example - daemon
+for those of you who dont know a daemon is a service in linux, it's distinct for not having a controlling terminal and being run under systemd.
+the easiest way to "daemonize" a process is using libc make_daemon function, when we use this function and strace the executable we should see the following output:
+
+
