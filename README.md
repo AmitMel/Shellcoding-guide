@@ -278,6 +278,7 @@ i split the code into a few labels
 - label_sleep - make our daemon sleep for a minute so we have time to examine it (this is the place to put the actions you want the daemon to preform) and use exit to kill the daemon
 - label_path - push the string '/dev/null' to the stack for label_devnull and call label_devnull
 
+a small clarification, this code is a little less efficient for the purpose of making it more readable. with small rearranging it can be as efficient as possible. 
 when strace-ing we expect to see fork being executed and then the code exits since the shellcode is as minimalistic as possible not like the compiled c code
 
 ![Alt text](images/shellcode_strace.png)
